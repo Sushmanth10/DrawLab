@@ -1,0 +1,173 @@
+:root {
+  --ink:       #0d0d0d;
+  --paper:     #f5f0e8;
+  --accent:    #ff4d1c;
+  --muted:     #c8c2b4;
+  --panel:     #1a1a1a;
+  --panel2:    #252525;
+  --highlight: #ffde59;
+}
+
+/* ---------- Reset & Base ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Space Mono', monospace;
+  background: var(--ink);
+  color: var(--paper);
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+#root { height: 100vh; display: flex; flex-direction: column; }
+
+canvas { display: block; }
+
+/* ---------- Canvas Wrapper (the viewport) ---------- */
+.canvas-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, #1e1e1e 0%, #111 100%);
+}
+
+.canvas-wrapper::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
+/* ---------- Canvas scale container ---------- */
+.canvas-scale-container {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: top left;
+  /* transform set dynamically via JS */
+}
+
+/* ---------- Header Logo ---------- */
+.header-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 20px;
+  letter-spacing: -0.03em;
+  color: var(--paper);
+}
+.header-logo span { color: var(--accent); }
+
+/* ---------- Action Buttons ---------- */
+.action-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 6px;
+  font-size: 12px; font-family: 'Space Mono', monospace;
+  cursor: pointer; transition: all 0.15s;
+  border: 1.5px solid #444;
+  background: transparent; color: var(--muted);
+}
+.action-btn:hover { background: var(--panel2); color: var(--paper); border-color: #666; }
+.action-btn.danger:hover { border-color: #e55; color: #f88; background: rgba(200,40,40,0.1); }
+.action-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+.action-btn.primary:hover { background: #e0360a; border-color: #e0360a; }
+
+/* ---------- Zoom Controls ---------- */
+.zoom-controls {
+  display: flex; align-items: center; gap: 4px;
+  background: #1a1a1a; border: 1.5px solid #333;
+  border-radius: 8px; padding: 2px 6px;
+}
+.zoom-btn {
+  width: 26px; height: 26px; border-radius: 5px;
+  border: none; background: transparent; color: var(--muted);
+  cursor: pointer; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.zoom-btn:hover { background: var(--panel2); color: var(--paper); }
+.zoom-label {
+  min-width: 44px; text-align: center;
+  font-size: 11px; color: #888;
+  font-family: 'Space Mono', monospace;
+  cursor: pointer;
+}
+.zoom-label:hover { color: var(--paper); }
+
+/* ---------- Tool Buttons ---------- */
+.tool-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 6px;
+  border: 1.5px solid transparent; background: transparent;
+  color: var(--muted); cursor: pointer;
+  transition: all 0.15s ease; font-size: 18px;
+  position: relative;
+}
+.tool-btn:hover { background: var(--panel2); color: var(--paper); border-color: #444; }
+.tool-btn.active {
+  background: var(--accent); color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255,77,28,0.25);
+}
+.tooltip {
+  position: absolute; left: calc(100% + 10px); top: 50%;
+  transform: translateY(-50%);
+  background: #333; color: #fff; padding: 3px 8px; border-radius: 4px;
+  font-size: 11px; white-space: nowrap; opacity: 0;
+  transition: all 0.15s; pointer-events: none; z-index: 99;
+}
+.tool-btn:hover .tooltip {
+  opacity: 1; transform: translateY(-50%) translateX(4px);
+}
+
+/* ---------- Color Swatches ---------- */
+.color-swatch {
+  width: 26px; height: 26px; border-radius: 50%;
+  cursor: pointer; border: 2px solid transparent;
+  transition: transform 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.selected { border-color: white; transform: scale(1.1); }
+
+/* ---------- Sliders ---------- */
+.slider-wrap label { font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: #444; border-radius: 2px; outline: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
+
+/* ---------- Shape Grid ---------- */
+.shape-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.shape-btn {
+  width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 5px; border: 1.5px solid #333; background: #1a1a1a;
+  color: var(--muted); cursor: pointer; font-size: 14px; transition: all 0.15s;
+  position: relative;
+}
+.shape-btn:hover { background: var(--panel2); color: var(--paper); border-color: #555; }
+.shape-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.shape-btn .s-tip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: #222; color: #ccc; padding: 2px 7px; border-radius: 4px;
+  font-size: 10px; white-space: nowrap; opacity: 0;
+  transition: opacity 0.15s; pointer-events: none; z-index: 99;
+}
+.shape-btn:hover .s-tip { opacity: 1; }
+
+/* ---------- Misc ---------- */
+.divider { width: 100%; height: 1px; background: #2a2a2a; margin: 8px 0; }
+.section-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.1em; }
+
+/* ---------- Status Bar ---------- */
+.status-bar {
+  height: 26px; background: #111; border-top: 1px solid #2a2a2a;
+  display: flex; align-items: center; padding: 0 16px;
+  font-size: 11px; color: #555; gap: 20px; flex-shrink: 0;
+}
+.status-bar span b { color: #888; }
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation: fadeIn 0.2s ease; }
